@@ -10,7 +10,7 @@
 -- | "SDL.Video.Renderer" provides a high-level interface to SDL's accelerated 2D rendering library.
 
 module SDL.Video.Renderer
-  ( Renderer
+  ( Renderer(..)
 
     -- * 'Renderer' Configuration
     -- | These configuration options can be used with 'SDL.Video.createRenderer' to create 'Renderer's.
@@ -83,7 +83,7 @@ module SDL.Video.Renderer
   , masksToPixelFormat
 
   -- * Textures
-  , Texture
+  , Texture(..)
 
   -- ** Creating, Using and Destroying 'Texture's
   , createTexture
@@ -431,12 +431,8 @@ surfaceFormat (Surface s _) = liftIO $ SurfacePixelFormat . Raw.surfaceFormat <$
 -- Naming in this module is a little bit confuse...
 -- | Extract the PixelFormat out of a Surface
 surfacePixelFormat :: MonadIO m => Surface -> m PixelFormat
-surfacePixelFormat (Surface f _) = do
-  ptr <- (liftIO . peek) f
-  let ppf = Raw.surfaceFormat ptr
-  pf <- (liftIO . peek) ppf
-  let pff = Raw.pixelFormatFormat pf
-  return $ fromNumber pff
+surfacePixelFormat (Surface s _) = liftIO $ fromNumber <$>
+  (Raw.surfaceFormat <$> peek s >>= \p -> Raw.pixelFormatFormat <$> peek p)
 
 newtype Palette = Palette (Ptr Raw.Palette)
   deriving (Eq, Typeable)

@@ -66,6 +66,7 @@ module SDL.Video.Renderer
   , surfaceDimensions
   , surfaceFormat
   , surfacePixels
+  , surfacePixelFormat
 
   -- ** Accessing 'Surface' Data
   , lockSurface
@@ -426,6 +427,16 @@ surfacePixels (Surface s _) = liftIO $ Raw.surfacePixels <$> peek s
 -- | Inspect the pixel format under a surface.
 surfaceFormat :: MonadIO m => Surface -> m SurfacePixelFormat
 surfaceFormat (Surface s _) = liftIO $ SurfacePixelFormat . Raw.surfaceFormat <$> peek s
+
+-- Naming in this module is a little bit confuse...
+-- | Extract the PixelFormat out of a Surface
+surfacePixelFormat :: MonadIO m => Surface -> m PixelFormat
+surfacePixelFormat (Surface f _) = do
+  ptr <- (liftIO . peek) f
+  let ppf = Raw.surfaceFormat ptr
+  pf <- (liftIO . peek) ppf
+  let pff = Raw.pixelFormatFormat pf
+  return $ fromNumber pff
 
 newtype Palette = Palette (Ptr Raw.Palette)
   deriving (Eq, Typeable)
